@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Moq;
 using RestApi.Controllers;
 using RestApi.Models;
+using RestAPI.Repositories.IRepository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,30 +14,38 @@ namespace Test.RestAPITest
     public class WorkstationBookingControllerTests
     {
         private readonly WorkstationBookingController _controller;
+        private readonly Mock<IWorkstationBookingService> _mockService;
 
         public WorkstationBookingControllerTests()
         {
-            _controller = new WorkstationBookingController();
+            _mockService = new Mock<IWorkstationBookingService>();
+            _controller = new WorkstationBookingController(_mockService.Object);
         }
 
         [Fact]
         public void Get_ReturnsAllBookings()
         {
+            // Arrange
+            var bookings = new List<WorkstationBooking>
+            {
+                new WorkstationBooking { Id = 1, EmployeeName = "John", Seat = "A1", Start = DateTime.Now, End = DateTime.Now.AddHours(1) }
+            };
+            _mockService.Setup(service => service.GetAll()).Returns(bookings);
+
             // Act
             var result = _controller.Get();
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             var items = Assert.IsType<List<WorkstationBooking>>(okResult.Value);
-            Assert.Equal(0, items?.Count); // For default, the list is empty
+            Assert.Single(items);
         }
-
         [Fact]
         public void Get_ById_ReturnsBooking()
         {
             // Arrange
             var booking = new WorkstationBooking { Id = 1, EmployeeName = "John", Seat = "A1", Start = DateTime.Now, End = DateTime.Now.AddHours(1) };
-            _controller.Post(booking);
+            _mockService.Setup(service => service.GetById(1)).Returns(booking);
 
             // Act
             var result = _controller.Get(1);
@@ -49,29 +59,29 @@ namespace Test.RestAPITest
         public void Get_ById_ReturnsNotFound_WhenIdDoesNotExist()
         {
             // Arrange
-            var nonExistentId = -1;
+            _mockService.Setup(service => service.GetById(It.IsAny<int>())).Returns((WorkstationBooking)null);
 
             // Act
-            var result = _controller.Get(nonExistentId);
+            var result = _controller.Get(-1);
 
             // Assert
             Assert.IsType<NotFoundResult>(result.Result);
         }
-        
         [Fact]
         public void Post_CreatesBooking()
         {
             // Arrange
             var newBooking = new WorkstationBooking { EmployeeName = "Jane", Seat = "B2", Start = DateTime.Now, End = DateTime.Now.AddHours(2) };
-            
+            _mockService.Setup(service => service.Add(It.IsAny<WorkstationBooking>())).Returns(newBooking);
+            _mockService.Setup(service => service.GetById(It.IsAny<int>())).Returns(newBooking);
+
             // Act
             var result = _controller.Post(newBooking);
 
             // Assert
             var createdAtActionResult = Assert.IsType<CreatedAtActionResult>(result);
             var booking = Assert.IsType<WorkstationBooking>(createdAtActionResult.Value);
-           
-            Assert.Equal(1, booking.Id);
+            Assert.Equal(newBooking.EmployeeName, booking.EmployeeName);
         }
 
         [Fact]
@@ -86,83 +96,33 @@ namespace Test.RestAPITest
             // Assert
             Assert.IsType<BadRequestObjectResult>(result);
         }
-        [Fact]
-        public void Post_GeneratesUniqueID_EvenWhenIDIsProvided()
-        {
-            // Arrange
-            var existingBooking = new WorkstationBooking
-            {
-                Id = 1,
-                EmployeeName = "John",
-                Seat = "A1",
-                Start = DateTime.Now,
-                End = DateTime.Now.AddHours(1)
-            };
-
-            _controller.Post(existingBooking); // Adding the initial booking
-
-            var newBookingWithSameId = new WorkstationBooking
-            {
-                Id = 1, // Same ID as the existing booking
-                EmployeeName = "Jane",
-                Seat = "B2",
-                Start = DateTime.Now,
-                End = DateTime.Now.AddHours(2)
-            };
-
-            // Act
-            var result = _controller.Post(newBookingWithSameId); // Trying to post with an existing ID
-
-            // Assert
-            var createdAtActionResult = Assert.IsType<CreatedAtActionResult>(result);
-            var booking = Assert.IsType<WorkstationBooking>(createdAtActionResult.Value);
-
-            Assert.Equal(2, booking.Id);
-        }
 
         [Fact]
         public void Put_UpdatesBooking()
         {
             // Arrange
             var booking = new WorkstationBooking { Id = 1, EmployeeName = "John", Seat = "A1", Start = DateTime.Now, End = DateTime.Now.AddHours(1) };
-            _controller.Post(booking);
-
-            var updatedBooking = new WorkstationBooking { Id = 1, EmployeeName = "Jane", Seat = "B2", Start = DateTime.Now, End = DateTime.Now.AddHours(3) };
+            var updatedBooking = new WorkstationBooking { Id = 1, EmployeeName = "Jane", Seat = "B2", Start = DateTime.Now, End = DateTime.Now.AddHours(2) };
+            _mockService.Setup(service => service.GetById(1)).Returns(booking);
+            _mockService.Setup(service => service.Update(It.IsAny<int>(), It.IsAny<WorkstationBooking>())).Verifiable();
 
             // Act
             var result = _controller.Put(1, updatedBooking);
 
             // Assert
             Assert.IsType<NoContentResult>(result);
-            var resultBooking = _controller.Get(1).Result as OkObjectResult;
-            var updated = Assert.IsType<WorkstationBooking>(resultBooking?.Value);
-            Assert.Equal("Jane", updated.EmployeeName);
+            _mockService.Verify(service => service.Update(1, updatedBooking), Times.Once);
         }
+
         [Fact]
         public void Put_ReturnsNotFound_WhenIdDoesNotExist()
         {
             // Arrange
-            var booking = new WorkstationBooking
-            {
-                Id = 1,
-                EmployeeName = "John",
-                Seat = "A1",
-                Start = DateTime.Now,
-                End = DateTime.Now.AddHours(1)
-            };
-            _controller.Post(booking);
-
-            var updatedBooking = new WorkstationBooking
-            {
-                Id = 2, // ID that doesn't exist in the list
-                EmployeeName = "Jane",
-                Seat = "B2",
-                Start = DateTime.Now,
-                End = DateTime.Now.AddHours(3)
-            };
+            var updatedBooking = new WorkstationBooking { Id = 2, EmployeeName = "Jane", Seat = "B2", Start = DateTime.Now, End = DateTime.Now.AddHours(2) };
+            _mockService.Setup(service => service.GetById(2)).Returns((WorkstationBooking)null);
 
             // Act
-            var result = _controller.Put(2, updatedBooking); // ID 2 doesn't exist
+            var result = _controller.Put(2, updatedBooking);
 
             // Assert
             Assert.IsType<NotFoundResult>(result);
@@ -173,27 +133,28 @@ namespace Test.RestAPITest
         {
             // Arrange
             var booking = new WorkstationBooking { Id = 1, EmployeeName = "John", Seat = "A1", Start = DateTime.Now, End = DateTime.Now.AddHours(1) };
-            _controller.Post(booking);
+            _mockService.Setup(service => service.GetById(1)).Returns(booking);
+            _mockService.Setup(service => service.Delete(1)).Verifiable();
 
             // Act
             var result = _controller.Delete(1);
 
             // Assert
             Assert.IsType<NoContentResult>(result);
-            var getResult = _controller.Get(1);
-            Assert.IsType<NotFoundResult>(getResult.Result);
+            _mockService.Verify(service => service.Delete(1), Times.Once);
         }
+
         [Fact]
         public void Delete_ReturnsNotFound_WhenIdDoesNotExist()
         {
+            // Arrange
+            _mockService.Setup(service => service.GetById(It.IsAny<int>())).Returns((WorkstationBooking)null);
+
             // Act
-            // Try to delete a booking with an ID that does not exist
-            var result = _controller.Delete(999); // Assuming 999 is a non-existent ID
+            var result = _controller.Delete(999);
 
             // Assert
-            // Verify that the result is NotFoundResult
             Assert.IsType<NotFoundResult>(result);
-
         }
     }
 }

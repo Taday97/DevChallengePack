@@ -5,6 +5,7 @@ namespace RestAPI.Repositories.Repository
 {
     public class WorkstationBookingService : IWorkstationBookingService
     {
+
         private readonly List<WorkstationBooking> _bookings;
 
         public WorkstationBookingService()
@@ -12,51 +13,39 @@ namespace RestAPI.Repositories.Repository
             _bookings = new List<WorkstationBooking>();
         }
 
-        public IEnumerable<WorkstationBooking> GetAllBookings()
+        public List<WorkstationBooking> GetAll()
         {
             return _bookings;
         }
 
-        public WorkstationBooking GetBookingById(int id)
+        public WorkstationBooking GetById(int id)
         {
             return _bookings.FirstOrDefault(b => b.Id == id);
         }
 
-        public WorkstationBooking AddBooking(WorkstationBooking newBooking)
+        public WorkstationBooking Add(WorkstationBooking booking)
         {
-            if (string.IsNullOrEmpty(newBooking.EmployeeName) || string.IsNullOrEmpty(newBooking.Seat) ||
-                newBooking.Start == default || newBooking.End == default)
-            {
-                throw new ArgumentException("Missing required fields.");
-            }
-
-            newBooking.Id = _bookings.Count > 0 ? _bookings.Max(b => b.Id) + 1 : 1;
-            _bookings.Add(newBooking);
-            return newBooking;
+            booking.Id = _bookings.Count > 0 ? _bookings.Max(b => b.Id) + 1 : 1;
+            _bookings.Add(booking);
+            return booking;
         }
 
-        public bool UpdateBooking(int id, WorkstationBooking updatedBooking)
+        public void Update(int id, WorkstationBooking booking)
         {
             var index = _bookings.FindIndex(b => b.Id == id);
-            if (index == -1)
+            if (index != -1)
             {
-                return false;
+                _bookings[index] = booking;
             }
-
-            _bookings[index] = updatedBooking;
-            return true;
         }
 
-        public bool DeleteBooking(int id)
+        public void Delete(int id)
         {
             var booking = _bookings.FirstOrDefault(b => b.Id == id);
-            if (booking == null)
+            if (booking != null)
             {
-                return false;
+                _bookings.Remove(booking);
             }
-
-            _bookings.Remove(booking);
-            return true;
         }
     }
 }

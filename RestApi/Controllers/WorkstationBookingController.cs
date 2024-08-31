@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RestApi.Models;
+using RestAPI.Repositories.IRepository;
 using System.Collections.Generic;
 
 namespace RestApi.Controllers
@@ -8,66 +9,66 @@ namespace RestApi.Controllers
     [Route("api/[controller]")]
     public class WorkstationBookingController : ControllerBase
     {
-        List<WorkstationBooking> buchungen = new List<WorkstationBooking>();
+        private readonly IWorkstationBookingService _bookingService;
 
-        public WorkstationBookingController()
+        public WorkstationBookingController(IWorkstationBookingService bookingService)
         {
-            buchungen = buchungen ?? new List<WorkstationBooking>();
+            _bookingService = bookingService;
         }
 
         [HttpGet]
         public ActionResult<IEnumerable<WorkstationBooking>> Get()
         {
-            return Ok(buchungen);
+            return Ok(_bookingService.GetAll());
         }
 
         [HttpGet("{id}")]
         public ActionResult<WorkstationBooking> Get(int id)
         {
-            var buchung = buchungen.FirstOrDefault(b => b.Id == id);
-            if (buchung == null)
+            var booking = _bookingService.GetById(id);
+            if (booking == null)
             {
                 return NotFound();
             }
-            return Ok(buchung);
+            return Ok(booking);
         }
 
         [HttpPost]
-        public ActionResult Post([FromBody] WorkstationBooking neueBuchung)
+        public ActionResult Post([FromBody] WorkstationBooking newBooking)
         {
-            if (string.IsNullOrEmpty(neueBuchung.EmployeeName) || string.IsNullOrEmpty(neueBuchung.Seat) || neueBuchung.Start == default ||
-                neueBuchung.End == default)
+            if (string.IsNullOrEmpty(newBooking.EmployeeName) || string.IsNullOrEmpty(newBooking.Seat) || newBooking.Start == default ||
+                newBooking.End == default)
             {
                 return BadRequest("Missing required fields.");
             }
 
-            neueBuchung.Id = buchungen.Count > 0 ? buchungen.Max(b => b.Id) + 1 : 1;
-            buchungen.Add(neueBuchung);
-            return CreatedAtAction(nameof(Get), new { id = neueBuchung.Id }, neueBuchung);
-
+            _bookingService.Add(newBooking);
+            return CreatedAtAction(nameof(Get), new { id = newBooking.Id }, newBooking);
         }
 
         [HttpPut("{id}")]
-        public ActionResult Put(int id, [FromBody] WorkstationBooking aktualisierteBuchung)
+        public ActionResult Put(int id, [FromBody] WorkstationBooking updatedBooking)
         {
-            var index = buchungen.FindIndex(b => b.Id == id);
-            if (index == -1)
+            var booking = _bookingService.GetById(id);
+            if (booking == null)
             {
                 return NotFound();
             }
-            buchungen[index] = aktualisierteBuchung;
+
+            _bookingService.Update(id, updatedBooking);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
         {
-            var buchung = buchungen.FirstOrDefault(b => b.Id == id);
-            if (buchung == null)
+            var booking = _bookingService.GetById(id);
+            if (booking == null)
             {
                 return NotFound();
             }
-            buchungen.Remove(buchung);
+
+            _bookingService.Delete(id);
             return NoContent();
         }
     }

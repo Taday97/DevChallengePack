@@ -26,10 +26,10 @@ namespace Test.RestAPITest
                 await Task.Delay(100); // Simulate 100 ms processing
             };
 
-            var middleware = new PerformanceMiddleware(next, loggerMock.Object);
+            var middleware = new PerformanceMiddleware(next);
 
             // Act
-            await middleware.InvokeAsync(context);
+            await middleware.InvokeAsync(context, loggerMock.Object);
 
             // Assert
             loggerMock.Verify(

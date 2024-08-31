@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BirthdayApp\BirthdayApp.csproj" />
     <ProjectReference Include="..\ConsoleAPP\ConsoleAPP.csproj" />
     <ProjectReference Include="..\RestApi\RestAPI.csproj" />
   </ItemGroup>

@@ -40,7 +40,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 
-builder.Services.AddScoped < IPerformanceLoggerService,PerformanceLoggerService>();
+builder.Services.AddScoped <IPerformanceLoggerService,PerformanceLoggerService>();
 
 var app = builder.Build();
 

@@ -4,10 +4,10 @@ namespace RestAPI.Repositories.IRepository
 {
     public interface IWorkstationBookingService
     {
-        IEnumerable<WorkstationBooking> GetAllBookings();
-        WorkstationBooking GetBookingById(int id);
-        WorkstationBooking AddBooking(WorkstationBooking booking);
-        bool UpdateBooking(int id, WorkstationBooking updatedBooking);
-        bool DeleteBooking(int id);
+        List<WorkstationBooking> GetAll();
+        WorkstationBooking GetById(int id);
+        WorkstationBooking Add(WorkstationBooking booking);
+        void Update(int id, WorkstationBooking booking);
+        void Delete(int id);
     }
 }
