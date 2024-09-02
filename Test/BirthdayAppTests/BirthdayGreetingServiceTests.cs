@@ -2,9 +2,7 @@
 using BirthdayApp.Models;
 using BirthdayApp.Interfaces;
 using BirthdayApp.Services;
-using BirthdayApp.Implementations.DataProvider;
-using BirthdayApp.Implementations.MessageSender;
-using System.Reflection.Metadata;
+
 namespace Test.BirthdayAppTests
 {
     public class BirthdayGreetingServiceTests
@@ -18,12 +16,10 @@ namespace Test.BirthdayAppTests
             var mensajeTemplate = "Happy Birthday, {0}!";
 
             // Simula Friends que cumplen años hoy
-            var friendJuan = new Friend { Name = "Juan", Birthday = DateTime.Today, Email = "juan@example.com" };
-            var friendAna = new Friend { Name = "Ana", Birthday = DateTime.Today, Email = "ana@example.com" };
             var Friends = new List<Friend>
            {
-            friendJuan,
-            friendAna
+            new Friend { Name = "Juan", Birthday = DateTime.Today, Email = "juan@example.com" },
+            new Friend { Name = "Ana", Birthday = DateTime.Today, Email = "ana@example.com" }
            };
 
             mockDataProvider.Setup(dp => dp.GetFriends()).Returns(Friends);
@@ -34,8 +30,8 @@ namespace Test.BirthdayAppTests
             servicio.SendBirthdayGreeting();
 
             // Assert
-            mockMessageSender.Verify(ms => ms.SendMessage(friendJuan, "Happy Birthday, Juan!"), Times.Once);
-            mockMessageSender.Verify(ms => ms.SendMessage(friendAna, "Happy Birthday, Ana!"), Times.Once);
+            mockMessageSender.Verify(ms => ms.SendMessage("juan@example.com", "Happy Birthday, Juan!"), Times.Once);
+            mockMessageSender.Verify(ms => ms.SendMessage("ana@example.com", "Happy Birthday, Ana!"), Times.Once);
         }
 
         [Fact]
@@ -47,11 +43,10 @@ namespace Test.BirthdayAppTests
             var messageTemplate = "Happy Birthday, {0}!";
             var expectedMessage = "Happy Birthday, Juan!";
 
-            var friendBirthday = new Friend { Name = "Juan", Birthday = DateTime.Today, Email = "juan@example.com" };
 
             mockDataProvider.Setup(dp => dp.GetFriends()).Returns(new List<Friend>
            {
-            friendBirthday
+            new Friend { Name = "Juan", Birthday = DateTime.Today, Email = "juan@example.com" }
            });
 
             var service = new BirthdayGreetingService(mockDataProvider.Object, mockMessageSender.Object, messageTemplate);
@@ -60,7 +55,7 @@ namespace Test.BirthdayAppTests
             service.SendBirthdayGreeting();
 
             // Assert
-            mockMessageSender.Verify(ms => ms.SendMessage(friendBirthday, expectedMessage), Times.Once);
+            mockMessageSender.Verify(ms => ms.SendMessage("juan@example.com", expectedMessage), Times.Once);
         }
         [Fact]
         public void GetFriends_FromDifferentSources_ShouldWorkCorrectly()
@@ -103,12 +98,12 @@ namespace Test.BirthdayAppTests
 
 
             // Act
-            mockEmailSender.Object.SendMessage(friendBirthday, message);
-            mockWhatsAppSender.Object.SendMessage(friendBirthday, message);
+            mockEmailSender.Object.SendMessage("juan@example.com", message);
+            mockWhatsAppSender.Object.SendMessage("179 84 57 85", message);
 
             // Assert
-            mockEmailSender.Verify(ms => ms.SendMessage(friendBirthday, message), Times.Once);
-            mockWhatsAppSender.Verify(ms => ms.SendMessage(friendBirthday, message), Times.Once);
+            mockEmailSender.Verify(ms => ms.SendMessage("juan@example.com", message), Times.Once);
+            mockWhatsAppSender.Verify(ms => ms.SendMessage("179 84 57 85", message), Times.Once);
         }
     }
 }

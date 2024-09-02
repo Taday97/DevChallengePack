@@ -31,7 +31,7 @@ namespace BirthdayApp.Services
                 if (friend.Birthday.Month == date.Month && friend.Birthday.Day == date.Day)
                 {
                     var mensaje = string.Format(_mensajeTemplate, friend.Name);
-                    _messageSender.SendMessage(friend, mensaje);
+                    _messageSender.SendMessage(friend.Email, mensaje);
                 }
             }
         }

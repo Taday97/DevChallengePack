@@ -25,7 +25,7 @@ namespace BirthdayApp.Implementations.MessageSender
             _smtpPass = smtpPass;
         }
 
-        public void SendMessage(Friend friend, string message)
+        public void SendMessage(string email, string message)
         {
             using (var client = new SmtpClient(_smtpServer, _smtpPort))
             {

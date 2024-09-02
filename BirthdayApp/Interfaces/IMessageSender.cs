@@ -9,6 +9,6 @@ namespace BirthdayApp.Interfaces
 {
     public interface IMessageSender
     {
-        void SendMessage(Friend friend, string message);
+        void SendMessage(string contactInfo, string message);
     }
 }

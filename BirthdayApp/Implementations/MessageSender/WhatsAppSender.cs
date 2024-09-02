@@ -10,7 +10,7 @@ namespace BirthdayApp.Implementations.MessageSender
 {
     public class WhatsAppSender : IMessageSender
     {
-        public void SendMessage(Friend friend, string message)
+        public void SendMessage(string phone, string message)
         {
             //Logic for to send watapp
         }

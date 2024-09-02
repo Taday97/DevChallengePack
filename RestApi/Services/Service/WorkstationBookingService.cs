@@ -6,7 +6,7 @@ namespace RestAPI.Repositories.Repository
     public class WorkstationBookingService : IWorkstationBookingService
     {
 
-        private readonly List<WorkstationBooking> _bookings;
+        private readonly List<WorkstationBooking> _bookings = new List<WorkstationBooking>();
 
         public WorkstationBookingService()
         {
