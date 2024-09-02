@@ -51,7 +51,7 @@ namespace Test.BirthdayAppTests
 
             mockDataProvider.Setup(dp => dp.GetFriends()).Returns(new List<Friend>
            {
-             new Friend { Name = "Juan", Birthday = DateTime.Today, Email = "juan@example.com" }
+            friendBirthday
            });
 
             var service = new BirthdayGreetingService(mockDataProvider.Object, mockMessageSender.Object, messageTemplate);
@@ -83,7 +83,8 @@ namespace Test.BirthdayAppTests
             new Friend { Name = "Alice Johnson", Birthday = new DateTime(1992, 3, 10),Email = "alice.johnson@example.com" },
             new Friend { Name = "Bob Brown", Birthday = new DateTime(1988, 12, 1),Email = "bob.brown@example.com" } };
 
-
+            mockCsvProvider.Setup(dp => dp.GetFriends()).Returns(csvFriends);
+            mockTxtProvider.Setup(dp => dp.GetFriends()).Returns(txtFriends);
 
             // Act & Assert
             Assert.Equal(csvFriends, mockCsvProvider.Object.GetFriends());
