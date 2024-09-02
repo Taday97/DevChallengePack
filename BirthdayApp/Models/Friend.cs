@@ -12,14 +12,6 @@ namespace BirthdayApp.Models
         public DateTime Birthday { get; set; }
         public string Email { get; set; }
 
-        public Friend()
-        {
-        }
-        public Friend(string name, DateTime birthday, string email)
-        {
-            Name = name;
-            Birthday = birthday;
-            Email = email;
-        }
+        
     }
 }

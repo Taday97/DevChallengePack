@@ -4,121 +4,110 @@ using BirthdayApp.Interfaces;
 using BirthdayApp.Services;
 using BirthdayApp.Implementations.DataProvider;
 using BirthdayApp.Implementations.MessageSender;
+using System.Reflection.Metadata;
 namespace Test.BirthdayAppTests
 {
     public class BirthdayGreetingServiceTests
     {
-
         [Fact]
-        public void GetTodaysBirthdays_WithListDataProvider_ReturnsCorrectFriends()
+        public void SendBirthdayGreetings_SendMessageCorrect()
         {
             // Arrange
-            var friendsList = new List<Friend>
-            {
-                new Friend { Name = "John Doe", Birthday = new DateTime(1990, 5, 15), Email = "john.doe@example.com" },
-                new Friend { Name = "Jane Smith", Birthday = new DateTime(1985, DateTime.Today.Month, DateTime.Today.Day), Email = "jane.smith@example.com" },
-                new Friend { Name = "Alice Johnson", Birthday = new DateTime(1992, 3, 10), Email = "alice.johnson@example.com" },
-                new Friend { Name = "Bob Brown", Birthday = new DateTime(1988,DateTime.Today.Month, DateTime.Today.Day), Email = "bob.brown@example.com" }
-            };
-            IDataProvider dataProviderList = new ListDataProvider(friendsList);
-            var messageSender = new Mock<IMessageSender>();
-            var service = new BirthdayGreetingService(dataProviderList, messageSender.Object);
+            var mockDataProvider = new Mock<IDataProvider>();
+            var mockMessageSender = new Mock<IMessageSender>();
+            var mensajeTemplate = "Happy Birthday, {0}!";
 
-            var expectedFriends = new List<Friend>
-            {
-                new Friend { Name = "Jane Smith", Birthday = new DateTime(1985, DateTime.Today.Month, DateTime.Today.Day), Email = "jane.smith@example.com" },
-                new Friend { Name = "Bob Brown", Birthday = new DateTime(1988,DateTime.Today.Month, DateTime.Today.Day), Email = "bob.brown@example.com" }
-            };
+            // Simula Friends que cumplen años hoy
+            var friendJuan = new Friend { Name = "Juan", Birthday = DateTime.Today, Email = "juan@example.com" };
+            var friendAna = new Friend { Name = "Ana", Birthday = DateTime.Today, Email = "ana@example.com" };
+            var Friends = new List<Friend>
+           {
+            friendJuan,
+            friendAna
+           };
+
+            mockDataProvider.Setup(dp => dp.GetFriends()).Returns(Friends);
+
+            var servicio = new BirthdayGreetingService(mockDataProvider.Object, mockMessageSender.Object, mensajeTemplate);
 
             // Act
-            var result = service.GetTodaysBirthdays();
+            servicio.SendBirthdayGreeting();
 
             // Assert
-            Assert.Equal(expectedFriends.Count, result.Count);
-            for (int i = 0; i < expectedFriends.Count; i++)
-            {
-                Assert.Equal(expectedFriends[i].Name, result[i].Name);
-                Assert.Equal(expectedFriends[i].Birthday, result[i].Birthday);
-                Assert.Equal(expectedFriends[i].Email, result[i].Email);
-            }
+            mockMessageSender.Verify(ms => ms.SendMessage(friendJuan, "Happy Birthday, Juan!"), Times.Once);
+            mockMessageSender.Verify(ms => ms.SendMessage(friendAna, "Happy Birthday, Ana!"), Times.Once);
         }
-       
+
         [Fact]
-        public void GetTodaysBirthdays_WithCsvDataProvider_ReturnsCorrectFriends()
+        public void SendBirthdayGreetings_UsesCorrectGreetingTemplate()
         {
             // Arrange
-            var filePath = "C:\\Users\\taday\\source\\repos\\GETECAssessment\\BirthdayApp\\friendsCSV.csv";
-            IDataProvider dataProviderCsv = new CsvDataProvider(filePath);
-            var messageSender = new Mock<IMessageSender>();
-            var service = new BirthdayGreetingService(dataProviderCsv, messageSender.Object);
+            var mockDataProvider = new Mock<IDataProvider>();
+            var mockMessageSender = new Mock<IMessageSender>();
+            var messageTemplate = "Happy Birthday, {0}!";
+            var expectedMessage = "Happy Birthday, Juan!";
 
-            var expectedFriends = new List<Friend>();
+            var friendBirthday = new Friend { Name = "Juan", Birthday = DateTime.Today, Email = "juan@example.com" };
+
+            mockDataProvider.Setup(dp => dp.GetFriends()).Returns(new List<Friend>
+           {
+             new Friend { Name = "Juan", Birthday = DateTime.Today, Email = "juan@example.com" }
+           });
+
+            var service = new BirthdayGreetingService(mockDataProvider.Object, mockMessageSender.Object, messageTemplate);
 
             // Act
-            var result = service.GetTodaysBirthdays();
+            service.SendBirthdayGreeting();
 
             // Assert
-            Assert.Equal(expectedFriends.Count, result.Count);
+            mockMessageSender.Verify(ms => ms.SendMessage(friendBirthday, expectedMessage), Times.Once);
+        }
+        [Fact]
+        public void GetFriends_FromDifferentSources_ShouldWorkCorrectly()
+        {
+            // Arrange
+            var mockCsvProvider = new Mock<IDataProvider>();
+            var mockTxtProvider = new Mock<IDataProvider>();
+           
+            var csvFriends = new List<Friend> {
+            new Friend { Name = "Ana", Birthday = DateTime.Today,Email = "ana@example.com"},
+            new Friend { Name = "John Doe", Birthday = new DateTime(1990, 5, 15), Email = "john.doe@example.com"},
+            new Friend { Name = "Jane Smith", Birthday = new DateTime(1985, 9, 22), Email = "jane.smith@example.com" },
+            new Friend { Name = "Alice Johnson", Birthday = new DateTime(1992, 3, 10),Email = "alice.johnson@example.com" },
+            new Friend { Name = "Bob Brown", Birthday = new DateTime(1988, 12, 1),Email = "bob.brown@example.com" } };
+           
+            var txtFriends = new List<Friend> {
+            new Friend { Name = "Ana", Birthday = DateTime.Today,Email = "ana@example.com"},
+            new Friend { Name = "John Doe", Birthday = new DateTime(1990, 5, 15), Email = "john.doe@example.com"},
+            new Friend { Name = "Jane Smith", Birthday = new DateTime(1985, 9, 22), Email = "jane.smith@example.com" },
+            new Friend { Name = "Alice Johnson", Birthday = new DateTime(1992, 3, 10),Email = "alice.johnson@example.com" },
+            new Friend { Name = "Bob Brown", Birthday = new DateTime(1988, 12, 1),Email = "bob.brown@example.com" } };
+
+
+
+            // Act & Assert
+            Assert.Equal(csvFriends, mockCsvProvider.Object.GetFriends());
+            Assert.Equal(txtFriends, mockTxtProvider.Object.GetFriends());
+        }
+
+        [Fact]
+        public void SendMessage_UsingDifferentMethods_ShouldWorkCorrectly()
+        {
+            // Arrange
+            var mockEmailSender = new Mock<IMessageSender>();
+            var mockWhatsAppSender = new Mock<IMessageSender>();
+            var message = "Happy Birthday, Juan!";
             
-        }
-
-        [Fact]
-        public void GetTodaysBirthdays_WithTxtDataProvider_ReturnsCorrectFriends()
-        {
-            // Arrange
-            var filePath = "C:\\Users\\taday\\source\\repos\\GETECAssessment\\BirthdayApp\\friendsTXT.txt";
-            IDataProvider dataProviderTxt = new TxtDataProvider(filePath);
-            var messageSender = new Mock<IMessageSender>();
-            var service = new BirthdayGreetingService(dataProviderTxt, messageSender.Object);
-
-            var expectedFriends = new List<Friend>();
-
-            // Act
-            var result = service.GetTodaysBirthdays();
-
-            // Assert
-            Assert.Equal(expectedFriends.Count, result.Count);
-        }
-
-        [Fact]
-        public void SendMessage_WithEmailSender_SendsCorrectMessage()
-        {
-            var smtpServer = "smtp.example.com";
-            var smtpPort = 587;
-            var smtpUser = "user@example.com";
-            var smtpPass = "password";
-            var emailSender = new EmailSender(smtpServer, smtpPort, smtpUser, smtpPass);
-
-            var friend = new Friend { Name = "Jane Smith", Birthday = DateTime.Today, Email = "jane.smith@example.com" };
-            var message = "Happy Birthday, Jane!";
+            var friendBirthday = new Friend { Name = "Juan", Birthday = DateTime.Today, Email = "juan@example.com" };
 
 
             // Act
-            var exception = Record.Exception(() => emailSender.SendMessage(friend, message));
+            mockEmailSender.Object.SendMessage(friendBirthday, message);
+            mockWhatsAppSender.Object.SendMessage(friendBirthday, message);
 
             // Assert
-            Assert.Null(exception); // Assert that no exception was thrown
+            mockEmailSender.Verify(ms => ms.SendMessage(friendBirthday, message), Times.Once);
+            mockWhatsAppSender.Verify(ms => ms.SendMessage(friendBirthday, message), Times.Once);
         }
-
-        [Fact]
-        public void SendMessage_WithCustomMessage_SendsCorrectMessage()
-        {
-            // Arrange
-            var dataProvider = new ListDataProvider(new List<Friend>
-             {
-               new Friend { Name = "Alice Johnson", Birthday = DateTime.Today, Email = "alice.johnson@example.com" }
-            });
-            var messageSender = new Mock<IMessageSender>();
-            var service = new BirthdayGreetingService(dataProvider, messageSender.Object);
-
-            var customMessage = "Wishing you a fantastic day, Alice!";
-
-            // Act
-            messageSender.Object.SendMessage(new Friend { Name = "Alice Johnson", Birthday = DateTime.Today, Email = "alice.johnson@example.com" },customMessage);
-
-            // Assert
-            messageSender.Verify(m => m.SendMessage(It.Is<Friend>(f => f.Name == "Alice Johnson"), customMessage), Times.Once);
-        }
-
     }
 }

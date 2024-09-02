@@ -10,38 +10,29 @@ namespace BirthdayApp.Services
 {
     public class BirthdayGreetingService
     {
-        private readonly List<Friend> _friends;
         private readonly IDataProvider _dataProvider;
         private readonly IMessageSender _messageSender;
+        private readonly string _mensajeTemplate;
 
-        public BirthdayGreetingService(IDataProvider dataProvider, IMessageSender messageSender)
+        public BirthdayGreetingService(IDataProvider dataProvider, IMessageSender messageSender, string mensajeTemplate)
         {
             _dataProvider = dataProvider;
-            _messageSender = messageSender; 
-            _friends = _dataProvider.GetFriends();  
+            _messageSender = messageSender;
+            _mensajeTemplate = mensajeTemplate;   
         }
 
-        public List<Friend> GetTodaysBirthdays()
+        public void SendBirthdayGreeting()
         {
-            var today = DateTime.Today;
-            return _friends.Where(f => f.Birthday.Month == today.Month && f.Birthday.Day == today.Day).ToList();
-        }
+            var friends = _dataProvider.GetFriends();
+            var date = DateTime.Today;
 
-        public Friend FindFriendByEmail(string email)
-        {
-            return _friends.FirstOrDefault(f => f.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
-        }
-
-        public bool DeleteFriendTodaysBirthdays(Friend friend)
-        {
-            try
+            foreach (var friend in friends)
             {
-                _friends.Remove(friend);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                return false;
+                if (friend.Birthday.Month == date.Month && friend.Birthday.Day == date.Day)
+                {
+                    var mensaje = string.Format(_mensajeTemplate, friend.Name);
+                    _messageSender.SendMessage(friend, mensaje);
+                }
             }
         }
     }
