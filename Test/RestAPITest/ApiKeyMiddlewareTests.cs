@@ -16,6 +16,7 @@ namespace Test.RestAPITest
             // Arrange
             var mockNext = new Mock<RequestDelegate>();
             var context = new DefaultHttpContext();
+
             var middleware = new ApiKeyMiddleware(mockNext.Object);
 
             // Act
