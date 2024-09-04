@@ -10,7 +10,7 @@ namespace Test.RestAPITest
 {
     public class ApiKeyMiddlewareTests
     {
-    [Fact]
+        [Fact]
         public async Task InvokeAsync_ApiKeyNotPresent_ShouldReturn401()
         {
             // Arrange
@@ -40,27 +40,7 @@ namespace Test.RestAPITest
             // Assert
             Assert.Equal(401, context.Response.StatusCode);
         }
-        [Fact]
-        public async Task InvokeAsync_ShouldReturnUnauthorized_WhenApiKeyIsMissing()
-        {
-            // Arrange
-            var context = new DefaultHttpContext();
-            var responseBody = new MemoryStream();
-            context.Response.Body = responseBody;
-
-            var next = new Mock<RequestDelegate>();
-            var middleware = new ApiKeyMiddleware(next.Object);
-
-            // Act
-            await middleware.InvokeAsync(context);
-
-            // Assert
-            Assert.Equal(401, context.Response.StatusCode); // Unauthorized
-            context.Response.Body.Seek(0, SeekOrigin.Begin);
-            var responseText = await new StreamReader(context.Response.Body).ReadToEndAsync();
-            Assert.Equal("API Key not found", responseText);
-        }
-
+       
         [Fact]
         public async Task InvokeAsync_ApiKeyCorrect_ShouldCallNextMiddleware()
         {

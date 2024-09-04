@@ -38,7 +38,7 @@ namespace Test.RestAPITest
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             var items = Assert.IsType<List<WorkstationBooking>>(okResult.Value);
-            Assert.Single(items);
+            Assert.Equal(bookings,items);
         }
         [Fact]
         public void Get_ById_ReturnsBooking()
@@ -72,23 +72,22 @@ namespace Test.RestAPITest
         {
             // Arrange
             var newBooking = new WorkstationBooking { EmployeeName = "Jane", Seat = "B2", Start = DateTime.Now, End = DateTime.Now.AddHours(2) };
-            _mockService.Setup(service => service.Add(It.IsAny<WorkstationBooking>())).Returns(newBooking);
-            _mockService.Setup(service => service.GetById(It.IsAny<int>())).Returns(newBooking);
-
+         
             // Act
             var result = _controller.Post(newBooking);
 
             // Assert
-            var createdAtActionResult = Assert.IsType<CreatedAtActionResult>(result);
-            var booking = Assert.IsType<WorkstationBooking>(createdAtActionResult.Value);
-            Assert.Equal(newBooking.EmployeeName, booking.EmployeeName);
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            Assert.Equal(200, okResult.StatusCode);
+            Assert.Equal(newBooking, okResult.Value);
+            _mockService.Verify(service => service.Add(It.IsAny<WorkstationBooking>()), Times.Once);
         }
 
         [Fact]
         public void Post_ReturnsBadRequest_WhenRequiredFieldsAreMissing()
         {
             // Arrange
-            var incompleteBooking = new WorkstationBooking { EmployeeName = "Jane" }; // Missing Seat, Start, End
+            var incompleteBooking = new WorkstationBooking {}; // Missing EmployeeName, Seat, Start, End
 
             // Act
             var result = _controller.Post(incompleteBooking);
@@ -104,14 +103,13 @@ namespace Test.RestAPITest
             var booking = new WorkstationBooking { Id = 1, EmployeeName = "John", Seat = "A1", Start = DateTime.Now, End = DateTime.Now.AddHours(1) };
             var updatedBooking = new WorkstationBooking { Id = 1, EmployeeName = "Jane", Seat = "B2", Start = DateTime.Now, End = DateTime.Now.AddHours(2) };
             _mockService.Setup(service => service.GetById(1)).Returns(booking);
-            _mockService.Setup(service => service.Update(It.IsAny<int>(), It.IsAny<WorkstationBooking>())).Verifiable();
 
             // Act
-            var result = _controller.Put(1, updatedBooking);
+            var result = _controller.Put(updatedBooking);
 
             // Assert
             Assert.IsType<NoContentResult>(result);
-            _mockService.Verify(service => service.Update(1, updatedBooking), Times.Once);
+            _mockService.Verify(service => service.Update(updatedBooking), Times.Once);
         }
 
         [Fact]
@@ -122,7 +120,7 @@ namespace Test.RestAPITest
             _mockService.Setup(service => service.GetById(2)).Returns((WorkstationBooking)null);
 
             // Act
-            var result = _controller.Put(2, updatedBooking);
+            var result = _controller.Put(updatedBooking);
 
             // Assert
             Assert.IsType<NotFoundResult>(result);
@@ -134,7 +132,6 @@ namespace Test.RestAPITest
             // Arrange
             var booking = new WorkstationBooking { Id = 1, EmployeeName = "John", Seat = "A1", Start = DateTime.Now, End = DateTime.Now.AddHours(1) };
             _mockService.Setup(service => service.GetById(1)).Returns(booking);
-            _mockService.Setup(service => service.Delete(1)).Verifiable();
 
             // Act
             var result = _controller.Delete(1);

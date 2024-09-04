@@ -15,7 +15,7 @@ namespace Test.BirthdayAppTests
             var mockMessageSender = new Mock<IMessageSender>();
             var mensajeTemplate = "Happy Birthday, {0}!";
 
-            // Simula Friends que cumplen años hoy
+            // Simulate Friends who have birthdays today
             var Friends = new List<Friend>
            {
             new Friend { Name = "Juan", Birthday = DateTime.Today, Email = "juan@example.com" },

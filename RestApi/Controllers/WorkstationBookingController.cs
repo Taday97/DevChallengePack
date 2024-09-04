@@ -43,19 +43,19 @@ namespace RestApi.Controllers
             }
 
             _bookingService.Add(newBooking);
-            return CreatedAtAction(nameof(Get), new { id = newBooking.Id }, newBooking);
+            return Ok(newBooking);
         }
 
-        [HttpPut("{id}")]
-        public ActionResult Put(int id, [FromBody] WorkstationBooking updatedBooking)
+        [HttpPut]
+        public ActionResult Put([FromBody] WorkstationBooking updatedBooking)
         {
-            var booking = _bookingService.GetById(id);
+            var booking = _bookingService.GetById(updatedBooking.Id);
             if (booking == null)
             {
                 return NotFound();
             }
 
-            _bookingService.Update(id, updatedBooking);
+            _bookingService.Update(updatedBooking);
             return NoContent();
         }
 

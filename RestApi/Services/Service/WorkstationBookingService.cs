@@ -30,9 +30,9 @@ namespace RestAPI.Repositories.Repository
             return booking;
         }
 
-        public void Update(int id, WorkstationBooking booking)
+        public void Update(WorkstationBooking booking)
         {
-            var index = _bookings.FindIndex(b => b.Id == id);
+            var index = _bookings.FindIndex(b => b.Id == booking.Id);
             if (index != -1)
             {
                 _bookings[index] = booking;

@@ -28,7 +28,7 @@ namespace Test.ConsoleTest
         {
             // Arrange
             var primeNumbers = new PrimeNumbers();
-            var expected = string.Empty;
+            var expected ="";
 
             // Act
             var result = primeNumbers.GetPrimeNumbers(0);

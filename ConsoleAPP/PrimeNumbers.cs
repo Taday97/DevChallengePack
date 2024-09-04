@@ -18,7 +18,7 @@ namespace ConsoleAPP
                 {
                     if (count > 0)
                     {
-                        primeNumbers.Append(","); // Añadir coma antes de un nuevo número, excepto el primero
+                        primeNumbers.Append(","); 
                     }
                     primeNumbers.Append(i.ToString());
                     
@@ -41,7 +41,7 @@ namespace ConsoleAPP
             if (isPrime)
             {
                 // Check only odd numbers
-                for (int i = 3; i <= Math.Sqrt(number); i += 2)
+                for (int i = 3; i <= Math.Sqrt(number); i++)
                 {
                     if (number % i == 0)
                     {

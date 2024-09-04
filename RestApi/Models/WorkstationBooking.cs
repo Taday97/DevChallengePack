@@ -9,11 +9,6 @@ namespace RestApi.Models
         public string Seat { get; set; }
         public DateTime Start { get; set; }
         public DateTime End { get; set; }
-
-        public WorkstationBooking()
-        {
-            EmployeeName = string.Empty;
-            Seat = string.Empty;
-        }
+       
     }
 }

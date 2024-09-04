@@ -7,7 +7,7 @@ namespace RestAPI.Repositories.IRepository
         List<WorkstationBooking> GetAll();
         WorkstationBooking GetById(int id);
         WorkstationBooking Add(WorkstationBooking booking);
-        void Update(int id, WorkstationBooking booking);
+        void Update(WorkstationBooking booking);
         void Delete(int id);
     }
 }
