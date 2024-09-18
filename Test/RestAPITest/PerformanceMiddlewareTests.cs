@@ -1,11 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
-using RestAPI.Repositories.Repository;
 using Moq;
 using RestApi.Middleware;
-using RestAPI.Repositories.IRepository;
 using System.Text.RegularExpressions;
+using RestAPI.Services.IService;
 
 namespace Test.RestAPITest
 {

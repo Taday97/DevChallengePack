@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RestApi.Models;
-using RestAPI.Repositories.IRepository;
+using RestAPI.Services.IService;
 using System.Collections.Generic;
 
 namespace RestApi.Controllers

@@ -5,7 +5,7 @@
         private readonly RequestDelegate _next;
         private const string ApiKeyHeaderName = "X-API-KEY";
         private const string ApiKeyPrefix = "ApiKey ";
-        private const string configuredApiKey = "GETECAufgabe*123";
+        private const string configuredApiKey = "DevChallengePackAufgabe*123";
         public ApiKeyMiddleware(RequestDelegate next)
         {
             _next = next;

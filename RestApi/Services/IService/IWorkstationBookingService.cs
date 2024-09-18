@@ -1,6 +1,6 @@
 ﻿using RestApi.Models;
 
-namespace RestAPI.Repositories.IRepository
+namespace RestAPI.Services.IService
 {
     public interface IWorkstationBookingService
     {

@@ -1,4 +1,4 @@
-﻿using RestAPI.Repositories.IRepository;
+﻿using RestAPI.Services.IService;
 using System.Diagnostics;
 
 namespace RestApi.Middleware

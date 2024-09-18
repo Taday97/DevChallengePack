@@ -1,7 +1,7 @@
 ﻿using RestApi.Models;
-using RestAPI.Repositories.IRepository;
+using RestAPI.Services.IService;
 
-namespace RestAPI.Repositories.Repository
+namespace RestAPI.Services.Service
 {
     public class PerformanceLoggerService : IPerformanceLoggerService
     {

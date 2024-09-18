@@ -2,7 +2,7 @@
 using Moq;
 using RestApi.Controllers;
 using RestApi.Models;
-using RestAPI.Repositories.IRepository;
+using RestAPI.Services.IService;
 using System;
 using System.Collections.Generic;
 using System.Linq;

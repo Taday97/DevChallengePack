@@ -49,7 +49,7 @@ namespace Test.RestAPITest
             var mockNext = new Mock<RequestDelegate>();
             mockNext.Setup(m => m.Invoke(It.IsAny<HttpContext>())).Returns(Task.CompletedTask);
             var context = new DefaultHttpContext();
-            context.Request.Headers["X-API-KEY"] = "ApiKey GETECAufgabe*123";
+            context.Request.Headers["X-API-KEY"] = "ApiKey DevChallengePackAufgabe*123";
             var middleware = new ApiKeyMiddleware(mockNext.Object);
 
             // Act
